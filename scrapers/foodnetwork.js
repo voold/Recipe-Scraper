@@ -3,27 +3,25 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const foodNetwork = url => {
+const foodNetwork = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("foodnetwork.com/recipes/")) {
       reject(new Error("url provided must include 'foodnetwork.com/recipes/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           Recipe.name = $(".o-AssetTitle__a-HeadlineText")
             .first()
             .text();
-          $(".o-Ingredients__a-Ingredient, .o-Ingredients__a-SubHeadline").each(
-            (i, el) => {
-              const item = $(el)
-                .text()
-                .replace(/\s\s+/g, "");
-              Recipe.ingredients.push(item);
-            }
-          );
+          $(".o-Ingredients__a-Ingredient, .o-Ingredients__a-SubHeadline").each((i, el) => {
+            const item = $(el)
+              .text()
+              .replace(/\s\s+/g, "");
+            Recipe.ingredients.push(item);
+          });
 
           $(".o-Method__m-Step").each((i, el) => {
             const step = $(el)
@@ -59,11 +57,7 @@ const foodNetwork = url => {
             }
           });
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);

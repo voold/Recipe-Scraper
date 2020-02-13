@@ -3,14 +3,14 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const allRecipes = url => {
+const allRecipes = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("allrecipes.com/recipe")) {
       reject(new Error("url provided must include 'allrecipes.com/recipe'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
           // Check if recipe is in new format
           if ((Recipe.name = $(".intro").text())) {
@@ -96,7 +96,7 @@ const oldAllRecipes = ($, Recipe) => {
   Recipe.time.prep = $("time[itemprop=prepTime]").text();
   Recipe.time.cook = $("time[itemprop=cookTime]").text();
   Recipe.time.ready = $("time[itemprop=totalTime]").text();
-  Recipe.servings = $("#metaRecipeServings").attr('content');
+  Recipe.servings = $("#metaRecipeServings").attr("content");
 };
 
 module.exports = allRecipes;

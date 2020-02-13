@@ -3,14 +3,14 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const budgetBytes = url => {
+const budgetBytes = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("budgetbytes.com/")) {
       reject(new Error("url provided must include 'budgetbytes.com/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           Recipe.name = $(".wprm-recipe-name").text();
@@ -40,11 +40,7 @@ const budgetBytes = url => {
 
           Recipe.servings = $(".wprm-recipe-servings").text();
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);

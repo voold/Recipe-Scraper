@@ -3,16 +3,14 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const simplyRecipes = url => {
+const simplyRecipes = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("simplyrecipes.com/recipes/")) {
-      reject(
-        new Error("url provided must include 'simplyrecipes.com/recipes/'")
-      );
+      reject(new Error("url provided must include 'simplyrecipes.com/recipes/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           Recipe.name = $(".recipe-callout")
@@ -39,11 +37,7 @@ const simplyRecipes = url => {
 
           Recipe.servings = $(".yield").text();
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);

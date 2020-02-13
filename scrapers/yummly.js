@@ -3,18 +3,7 @@ const puppeteer = require("puppeteer");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const blockedResourceTypes = [
-  "image",
-  "media",
-  "font",
-  "texttrack",
-  "object",
-  "beacon",
-  "csp_report",
-  "imageset",
-  "stylesheet",
-  "font"
-];
+const blockedResourceTypes = ["image", "media", "font", "texttrack", "object", "beacon", "csp_report", "imageset", "stylesheet", "font"];
 
 const skippedResources = [
   "quantserve",
@@ -38,17 +27,14 @@ const skippedResources = [
   "tiqcdn"
 ];
 
-const customPuppeteerFetch = async url => {
+const customPuppeteerFetch = async (url) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.setRequestInterception(true);
 
-  page.on("request", req => {
+  page.on("request", (req) => {
     const requestUrl = req._url.split("?")[0].split("#")[0];
-    if (
-      blockedResourceTypes.indexOf(req.resourceType()) !== -1 ||
-      skippedResources.some(resource => requestUrl.indexOf(resource) !== -1)
-    ) {
+    if (blockedResourceTypes.indexOf(req.resourceType()) !== -1 || skippedResources.some((resource) => requestUrl.indexOf(resource) !== -1)) {
       req.abort();
     } else {
       req.continue();
@@ -63,10 +49,7 @@ const customPuppeteerFetch = async url => {
 
         while (steps >= newSteps) {
           await page.waitFor(100);
-          await page.$eval(
-            "a.view-more-steps",
-            /* istanbul ignore next */ elem => elem.click()
-          );
+          await page.$eval("a.view-more-steps", /* istanbul ignore next */ (elem) => elem.click());
           newSteps = (await page.$$(".step")).length;
         }
       } finally {
@@ -84,7 +67,7 @@ const customPuppeteerFetch = async url => {
   }
 };
 
-const yummy = url => {
+const yummy = (url) => {
   return new Promise(async (resolve, reject) => {
     if (!url.includes("yummly.com/recipe")) {
       reject(new Error("url provided must include 'yummly.com/recipe'"));

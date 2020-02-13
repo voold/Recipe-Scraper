@@ -3,14 +3,14 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const smittenKitchen = url => {
+const smittenKitchen = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("smittenkitchen.com/")) {
       reject(new Error("url provided must include 'smittenkitchen.com/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           if ($(".jetpack-recipe").length) {
@@ -18,11 +18,7 @@ const smittenKitchen = url => {
           } else {
             oldSmitten($, Recipe);
           }
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);
@@ -48,12 +44,7 @@ const oldSmitten = ($, Recipe) => {
         .children("b")
         .text()
         .trim();
-    } else if (
-      $(el).children("br").length &&
-      !$(el).children("b").length &&
-      !orderedListRegex.test($(el).text()) &&
-      !servingsRegex.test($(el).text())
-    ) {
+    } else if ($(el).children("br").length && !$(el).children("b").length && !orderedListRegex.test($(el).text()) && !servingsRegex.test($(el).text())) {
       ingredientSwitch = true;
       let updatedIngredients = Recipe.ingredients.concat(
         $(el)
@@ -73,7 +64,7 @@ const oldSmitten = ($, Recipe) => {
     } else {
       let possibleServing = $(el).text();
       if (servingsRegex.test(possibleServing)) {
-        possibleServing.split("\n").forEach(line => {
+        possibleServing.split("\n").forEach((line) => {
           if (servingsRegex.test(line)) {
             Recipe.servings = line.substring(line.indexOf(":") + 2);
           }
@@ -97,18 +88,15 @@ const newSmitten = ($, Recipe) => {
   Recipe.instructions = $(".jetpack-recipe-directions")
     .text()
     .split("\n")
-    .filter(instruction => instruction);
+    .filter((instruction) => instruction);
 
   if (!Recipe.instructions.length) {
     let lastIngredient = Recipe.ingredients[Recipe.ingredients.length - 1];
     let recipeContents = $(".entry-content").text();
     Recipe.instructions = recipeContents
-      .slice(
-        recipeContents.indexOf(lastIngredient) + lastIngredient.length,
-        recipeContents.indexOf("Rate this:")
-      )
+      .slice(recipeContents.indexOf(lastIngredient) + lastIngredient.length, recipeContents.indexOf("Rate this:"))
       .split("\n")
-      .filter(instruction => instruction);
+      .filter((instruction) => instruction);
   }
 
   Recipe.time.total = $("time[itemprop=totalTime]")

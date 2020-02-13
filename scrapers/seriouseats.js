@@ -3,29 +3,23 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const seriousEats = url => {
+const seriousEats = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("seriouseats.com/")) {
       reject(new Error("url provided must include 'seriouseats.com/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           if (url.includes("seriouseats.com/sponsored/")) {
-            reject(
-              new Error("seriouseats.com sponsored recipes not supported")
-            );
+            reject(new Error("seriouseats.com sponsored recipes not supported"));
           } else {
             regularRecipe($, Recipe);
           }
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);

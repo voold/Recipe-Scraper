@@ -3,16 +3,14 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const thePioneerWoman = url => {
+const thePioneerWoman = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("thepioneerwoman.com/cooking/")) {
-      reject(
-        new Error("url provided must include 'thepioneerwoman.com/cooking/'")
-      );
+      reject(new Error("url provided must include 'thepioneerwoman.com/cooking/'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
 
           Recipe.name = $(".recipe-title")
@@ -49,11 +47,7 @@ const thePioneerWoman = url => {
 
           Recipe.servings = times.last().text();
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);

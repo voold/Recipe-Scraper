@@ -3,26 +3,42 @@ const cheerio = require("cheerio");
 
 const RecipeSchema = require("../helpers/recipe-schema");
 
-const eatingWell = url => {
+const eatingWell = (url) => {
   const Recipe = new RecipeSchema();
   return new Promise((resolve, reject) => {
     if (!url.includes("eatingwell.com/recipe")) {
       reject(new Error("url provided must include 'eatingwell.com/recipe'"));
     } else {
       request(url, (error, response, html) => {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           const $ = cheerio.load(html);
-          
-          Recipe.name = $(".main-header").find(".headline").text().trim();
+
+          Recipe.name = $(".main-header")
+            .find(".headline")
+            .text()
+            .trim();
 
           $(".ingredients-section__legend, .ingredients-item-name").each((i, el) => {
-            if (!$(el).attr('class').includes('visually-hidden')) {
-              Recipe.ingredients.push($(el).text().trim().replace(/\s\s+/g, " "));
+            if (
+              !$(el)
+                .attr("class")
+                .includes("visually-hidden")
+            ) {
+              Recipe.ingredients.push(
+                $(el)
+                  .text()
+                  .trim()
+                  .replace(/\s\s+/g, " ")
+              );
             }
           });
 
           $(".instructions-section-item").each((i, el) => {
-            Recipe.instructions.push($(el).find("p").text());
+            Recipe.instructions.push(
+              $(el)
+                .find("p")
+                .text()
+            );
           });
 
           $(".recipe-meta-item").each((i, el) => {
@@ -57,11 +73,7 @@ const eatingWell = url => {
             }
           });
 
-          if (
-            !Recipe.name ||
-            !Recipe.ingredients.length ||
-            !Recipe.instructions.length
-          ) {
+          if (!Recipe.name || !Recipe.ingredients.length || !Recipe.instructions.length) {
             reject(new Error("No recipe found on page"));
           } else {
             resolve(Recipe);
